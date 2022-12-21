@@ -1,0 +1,7 @@
+routes:
+  homepage:
+    url: '/'
+    template: 'index.html'
+  testpage:
+    url: '/home'
+    template: 'index.html'
