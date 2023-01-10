@@ -1,0 +1,13 @@
+endpoints:
+  list_notes:
+    url: '/notes'
+    method: GET
+    db_table: notes
+    return: json
+    fields: all
+  add_note:
+    url: '/notes'
+    method: POST
+    db_table: notes
+    return: json
+    fields: all

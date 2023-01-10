@@ -3,4 +3,8 @@ jinja2
 starlette
 uvicorn
 pyaml
+databases
+sqlalchemy
+asyncpg
+psycopg2
 
