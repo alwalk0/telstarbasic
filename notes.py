@@ -1,10 +1,5 @@
 import databases
 import sqlalchemy
-from starlette.applications import Starlette
-from starlette.config import Config
-from starlette.responses import JSONResponse
-from starlette.routing import Route
-import uvicorn
 
 # Configuration from environment variables or '.env' file.
 # config = Config('.env')
