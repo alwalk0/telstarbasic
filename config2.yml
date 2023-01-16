@@ -4,10 +4,10 @@ endpoints:
     method: GET
     db_table: notes
     return: json
-    fields: all
+    fields: text, completed
   add_note:
     url: '/notes'
     method: POST
     db_table: notes
     return: json
-    fields: all
+    fields: text, completed

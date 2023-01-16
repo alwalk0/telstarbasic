@@ -7,4 +7,5 @@ databases
 sqlalchemy
 asyncpg
 psycopg2
+databases
 

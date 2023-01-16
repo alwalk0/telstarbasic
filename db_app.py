@@ -54,7 +54,7 @@ routes = [
     Route("/notes", endpoint=list_notes, methods=["GET"]),
     Route("/notes", endpoint=add_note, methods=["POST"]),
 ]
-
+ 
 app = Starlette(
     routes=routes,
     on_startup=[database.connect],

@@ -36,6 +36,12 @@ async def add_note(request):
         "completed": data["completed"]
     })
 
+
+
+
+
+###############################################################################    
+
 app_routes = []
 
 with open('config2.yml', 'r') as file:
