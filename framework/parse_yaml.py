@@ -2,35 +2,13 @@ import yaml
 from articles import articles, database
 from starlette.responses import JSONResponse
 from starlette.routing import Route, Mount
-import databases
-import sqlalchemy
 from starlette.applications import Starlette
-from starlette.config import Config
 from starlette.responses import JSONResponse
 from starlette.routing import Route
-from starlette.requests import Request
+from .create_view_function import create_function
+   
 
-request = Request
-
-
-def create_function(table, *args, **kwargs):
-
-    async def function_template(*args, **kwargs):
-
-        query = table.select()
-        results = await database.fetch_all(query)
-        content = [
-            {
-                "title": result["title"],
-                "url": result["url"]
-            }
-            for result in results
-        ]
-        return JSONResponse(content)
-
-    return function_template    
-
-get_request = create_function(table=articles)    
+get_request = create_function(table=articles, database=database)    
 
 
 def create_app_from_config(config):
