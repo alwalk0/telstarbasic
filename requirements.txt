@@ -8,4 +8,5 @@ sqlalchemy
 asyncpg
 psycopg2
 databases
+alembic
 

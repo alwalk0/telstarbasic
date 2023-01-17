@@ -1,5 +1,5 @@
 import yaml
-from notes import notes, database
+from articles import notes, database
 from starlette.responses import JSONResponse
 from starlette.routing import Route, Mount
 import databases

@@ -1,5 +1,5 @@
 import yaml
-from notes import notes, database
+from articles import articles, database
 from starlette.responses import JSONResponse
 from starlette.routing import Route, Mount
 import databases
@@ -21,8 +21,8 @@ def create_function(table, *args, **kwargs):
         results = await database.fetch_all(query)
         content = [
             {
-                "text": result["text"],
-                "completed": result["completed"]
+                "title": result["title"],
+                "url": result["url"]
             }
             for result in results
         ]
@@ -30,7 +30,7 @@ def create_function(table, *args, **kwargs):
 
     return function_template    
 
-get_request = create_function(table=notes)    
+get_request = create_function(table=articles)    
 
 
 def create_app_from_config(config):
