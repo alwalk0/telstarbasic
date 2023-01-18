@@ -5,6 +5,7 @@ from starlette.applications import Starlette
 from starlette.config import Config
 from starlette.responses import JSONResponse
 from starlette.routing import Route
+import uvicorn
 
 
 #GET
@@ -13,8 +14,8 @@ async def list_notes(request):
     results = await database.fetch_all(query)
     content = [
         {
-            "text": result["text"],
-            "completed": result["completed"]
+            "title": result["title"],
+            "url": result["url"]
         }
         for result in results
     ]
@@ -44,3 +45,8 @@ app = Starlette(
     on_startup=[database.connect],
     on_shutdown=[database.disconnect]
 )
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host='0.0.0.0', port=8000)
+    
