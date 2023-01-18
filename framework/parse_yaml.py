@@ -8,7 +8,7 @@ from starlette.routing import Route
 from .create_view_function import create_function
    
 
-get_request = create_function(table=articles, database=database)    
+get_request = create_function(table=articles, database=database, method='POST')    
 
 
 def create_app_from_config(config):

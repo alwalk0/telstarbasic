@@ -25,13 +25,13 @@ async def list_notes(request):
 async def add_note(request):
     data = await request.json()
     query = articles.insert().values(
-       text=data["text"],
-       completed=data["completed"]
+       title=data["title"],
+       url=data["url"]
     )
     await database.execute(query)
     return JSONResponse({
-        "text": data["text"],
-        "completed": data["completed"]
+        "title": data["title"],
+        "url": data["url"]
     })
 
 
