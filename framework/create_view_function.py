@@ -2,33 +2,6 @@
 from starlette.responses import JSONResponse
 
 
-# #GET
-# async def list_notes(request):
-#     query = articles.select()
-#     results = await database.fetch_all(query)
-#     content = [
-#         {
-#             "text": result["text"],
-#             "completed": result["completed"]
-#         }
-#         for result in results
-#     ]
-#     return JSONResponse(content)
-
-# #POST
-# async def add_note(request):
-#     data = await request.json()
-#     query = articles.insert().values(
-#        text=data["text"],
-#        completed=data["completed"]
-#     )
-#     await database.execute(query)
-#     return JSONResponse({
-#         "text": data["text"],
-#         "completed": data["completed"]
-#     })
-
-
 def set_response(method, type, results):
     if type == 'json':
         if method == 'GET':
@@ -50,6 +23,7 @@ def get_query(input, table, data):
     if input == 'GET':
         return table.select()
     elif input == 'POST':
+        
         return table.insert().values(
         title=data["title"],
         url=data["url"]
