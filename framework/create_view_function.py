@@ -2,47 +2,47 @@
 from starlette.responses import JSONResponse
 
 
-def set_response(method, type, results):
-    if type == 'json':
-        if method == 'GET':
-            content = [
-            {
-                "title": result["title"],
-                "url": result["url"]
-            }
-            for result in results
-            ]
-            return JSONResponse(content)
-        elif method == 'POST':
-            return JSONResponse({'OK':'OK'})
-      
+def set_response(method, type, results, fields):
+    match type:
+        case 'json':
+            match method:
+                case 'GET':
+                    content = [
+                    {
+                        field: result[field] for field in fields
+                    }
+                    for result in results
+                    ]
+                    return JSONResponse(content)
+                case 'POST':
+                    return JSONResponse({'OK':'OK'})
+            
 
-async def get_query(request, input, table):
-    if input == 'GET':
-        return table.select()
-    if input == 'POST':
-        data = await request.json()
-        return table.insert().values(
-        title=data["title"],
-        url=data["url"]
-        )
-
-
-def get_execute_function(input, database, query):
-    if input == 'GET':
-        return database.fetch_all(query)
-    elif input == 'POST':
-        return database.execute(query)
+async def get_query(request, method, table):
+    match method:
+        case 'GET':
+            return table.select()
+        case 'POST':
+            data = await request.json()
+            return table.insert().values(data)
 
 
+def get_execute_function(method, database, query):
+    match method:
+        case 'GET':
+            return database.fetch_all(query)
+        case 'POST':
+            return database.execute(query)
 
-def create_view_function(table, database, method):
+
+
+def create_view_function(table, database, method, return_type, fields):
 
     async def view_function(request):
 
         query = await get_query(request, method, table)
         results = await get_execute_function(method, database, query)
 
-        return set_response(method, 'json', results)
+        return set_response(method, return_type, results, fields=fields)
 
     return view_function 

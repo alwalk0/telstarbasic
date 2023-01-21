@@ -1,7 +1,5 @@
 import yaml
 from starlette.applications import Starlette
-from starlette.exceptions import HTTPException
-from starlette.requests import Request
 from starlette.staticfiles import StaticFiles
 from starlette.routing import Route, Mount
 from starlette.templating import Jinja2Templates
@@ -28,14 +26,6 @@ with open('config.yml', 'r') as file:
 
 
 app_routes.append(Mount('/static', app=StaticFiles(directory='statics'), name='static'))   
-
-
-# routes = [
-#     Route('/', lambda request:templates.TemplateResponse("index.html", {'request':request})),
-#     Route('/error', error),
-#     Mount('/static', app=StaticFiles(directory='statics'), name='static')
-# ]
-
 
 
 app = Starlette(debug=True, routes=app_routes)    
