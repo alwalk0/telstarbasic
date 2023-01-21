@@ -5,10 +5,10 @@ from starlette.routing import Route, Mount
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse
 from starlette.routing import Route
-from .create_view_function import create_function
+from .create_view_function import create_view_function
    
 
-get_request = create_function(table=articles, database=database, method='GET')    
+get_request = create_view_function(table=articles, database=database, method='GET')    
 
 
 def create_app_from_config(config):

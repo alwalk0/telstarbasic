@@ -15,22 +15,18 @@ def set_response(method, type, results):
             return JSONResponse(content)
         elif method == 'POST':
             return JSONResponse({'OK':'OK'})
+      
 
-    else:
-        pass        
-
-def get_query(input, table, data):
+async def get_query(request, input, table):
     if input == 'GET':
         return table.select()
-    elif input == 'POST':
-        
+    if input == 'POST':
+        data = await request.json()
         return table.insert().values(
         title=data["title"],
         url=data["url"]
         )
-    else:
-        pass
-    #TODO
+
 
 def get_execute_function(input, database, query):
     if input == 'GET':
@@ -40,19 +36,13 @@ def get_execute_function(input, database, query):
 
 
 
-def create_function(table, database, method, *args, **kwargs):
+def create_view_function(table, database, method):
 
-    async def function_template(request, *args, **kwargs):
+    async def view_function(request):
 
-        if method == 'POST':
-            
-            data = await request.json()
-            query = get_query(method, table, data)
-        else:
-            query = get_query(method, table, data=None)   
-
+        query = await get_query(request, method, table)
         results = await get_execute_function(method, database, query)
 
         return set_response(method, 'json', results)
 
-    return function_template 
+    return view_function 
