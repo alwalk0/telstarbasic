@@ -1,4 +1,18 @@
-routes:
+my_app:
+  list_notes:
+    url: '/articles'
+    endpoint: api
+    method: GET
+    db_table: articles
+    return: json
+    fields: title, url
+  add_note:
+    url: '/articles'
+    endpoint: api
+    method: POST
+    db_table: articles
+    return: json
+    fields: title, url
   homepage:
     url: '/'
     endpoint: 'view'
@@ -6,4 +20,4 @@ routes:
   testpage:
     url: '/home'
     endpoint: view
-    template: 'index.html'
+    template: 'index.html'  
