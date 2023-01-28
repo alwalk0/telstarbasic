@@ -1,7 +1,9 @@
 routes:
   homepage:
     url: '/'
+    endpoint: 'view'
     template: 'index.html'
   testpage:
     url: '/home'
+    endpoint: view
     template: 'index.html'

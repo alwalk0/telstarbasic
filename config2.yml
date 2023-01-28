@@ -1,12 +1,14 @@
 endpoints:
   list_notes:
     url: '/articles'
+    endpoint: api
     method: GET
     db_table: articles
     return: json
     fields: title, url
   add_note:
     url: '/articles'
+    endpoint: api
     method: POST
     db_table: articles
     return: json

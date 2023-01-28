@@ -2,7 +2,7 @@ import uvicorn
 from framework.parse_yaml import create_app_from_config
 
 
-app = create_app_from_config('config2.yml')
+app = create_app_from_config('config.yml')
 
 
 if __name__ == "__main__":
