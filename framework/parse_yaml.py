@@ -6,6 +6,15 @@ from starlette.routing import Route, Mount
 from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 from .create_view_function import create_view_function
+import importlib
+import importlib.machinery
+from pathlib import Path
+
+
+module_path = Path(__file__).parent.parent
+modulename = importlib.machinery.SourceFileLoader('articles', '/Users/alan/Desktop/Projects/Code/telstarbasic/articles.py').load_module()
+print(getattr(modulename, 'database'))
+
 
 templates = Jinja2Templates(directory='templates')
 
@@ -33,7 +42,7 @@ def create_routes_list(yaml_dict: dict) -> list:
     return app_routes      
 
 
-def create_app_from_config(config:str)-> Starlette:
+def create_app_from_config(config:str, models, templates, views)-> Starlette:
 
     with open(config, 'r') as file:
         yaml_dict = yaml.safe_load(file)
@@ -47,3 +56,18 @@ def create_app_from_config(config:str)-> Starlette:
     )
 
     return app
+
+
+def parse_main_config(config:str):
+
+    with open(config, 'r') as file:
+        yaml_dict = yaml.safe_load(file)
+        port = yaml_dict.get('port')
+        host = yaml_dict.get('host')
+        models = yaml_dict['apps']['models']
+        templates = yaml_dict['apps']['templates']
+        views = yaml_dict['apps']['views']
+        database = yaml_dict['apps']['database']
+
+        return port, host, models, templates, views, database
+
