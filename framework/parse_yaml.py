@@ -1,5 +1,5 @@
 import yaml
-from articles import articles, database
+from articles import articles
 from starlette.routing import Route
 from starlette.applications import Starlette
 from starlette.routing import Route, Mount
@@ -13,13 +13,15 @@ from pathlib import Path
 
 module_path = Path(__file__).parent.parent
 modulename = importlib.machinery.SourceFileLoader('articles', '/Users/alan/Desktop/Projects/Code/telstarbasic/articles.py').load_module()
-print(getattr(modulename, 'database'))
+module = getattr(modulename, 'database')
+print(module)
+
 
 
 templates = Jinja2Templates(directory='templates')
 
 
-def create_routes_list(yaml_dict: dict) -> list:
+def create_routes_list(database, yaml_dict: dict) -> list:
     app_routes = []
     for key,value in yaml_dict.items():
         for k, v in value.items():
@@ -47,7 +49,9 @@ def create_app_from_config(config:str, models, templates, views)-> Starlette:
     with open(config, 'r') as file:
         yaml_dict = yaml.safe_load(file)
 
-    app_routes = create_routes_list(yaml_dict=yaml_dict)    
+    database = getattr(modulename, 'database')    
+
+    app_routes = create_routes_list(database, yaml_dict=yaml_dict)    
 
     app = Starlette(
         routes=app_routes,
