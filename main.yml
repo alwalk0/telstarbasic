@@ -1,8 +1,7 @@
 host: 0.0.0.0
 port: 8000
-apps: 
-    app_name: my_app
-    models: models.py
-    database: database
-    templates: templates
-    views: views.yml
+app_name: my_app
+models: models.py
+database: database
+templates: templates
+views: views.yml

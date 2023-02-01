@@ -44,7 +44,7 @@ def create_routes_list(database, yaml_dict: dict) -> list:
     return app_routes      
 
 
-def create_app_from_config(config:str, models, templates, views)-> Starlette:
+def create_app_from_config(config:str)-> Starlette:
 
     with open(config, 'r') as file:
         yaml_dict = yaml.safe_load(file)
@@ -68,10 +68,20 @@ def parse_main_config(config:str):
         yaml_dict = yaml.safe_load(file)
         port = yaml_dict.get('port')
         host = yaml_dict.get('host')
-        models = yaml_dict['apps']['models']
-        templates = yaml_dict['apps']['templates']
-        views = yaml_dict['apps']['views']
-        database = yaml_dict['apps']['database']
+        models = yaml_dict.get('models')
+        templates = yaml_dict.get('templates')
+        views = yaml_dict.get('views')
+        database = yaml_dict.get('database')
 
         return port, host, models, templates, views, database
+
+
+
+def read_key_from_config(config:str, key:str):
+    with open(config, 'r') as file:
+        yaml_dict = yaml.safe_load(file)
+    
+    return yaml_dict.get(key)
+
+
 
