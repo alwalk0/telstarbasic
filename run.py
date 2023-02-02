@@ -1,13 +1,14 @@
 import uvicorn
-from framework.parse_yaml import create_app_from_config, parse_main_config, read_key_from_config
+from framework.parse_yaml import create_app_from_config, read_key_from_config
 
 
+MAIN_CONFIG_PATH = 'main.yml'
 
-app = create_app_from_config('views.yml')
+views_config_name = read_key_from_config(MAIN_CONFIG_PATH, 'views')
 
-
-host = read_key_from_config('main.yml', 'host')
-port = read_key_from_config('main.yml', 'port')
+app = create_app_from_config(views_config_name)
+host = read_key_from_config(MAIN_CONFIG_PATH, 'host')
+port = read_key_from_config(MAIN_CONFIG_PATH, 'port')
 
 
 if __name__ == "__main__":
