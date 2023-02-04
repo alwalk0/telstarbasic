@@ -4,12 +4,12 @@ from starlette.routing import Route
 from starlette.applications import Starlette
 from starlette.routing import Route, Mount
 from starlette.staticfiles import StaticFiles
-from starlette.templating import Jinja2Templates
-from .create_view_function import create_view_function
 import importlib
 import importlib.machinery
 from pathlib import Path
 from starlette.responses import JSONResponse
+from starlette.templating import Jinja2Templates
+
 
 
 def set_response(method, type, results, fields):
@@ -87,6 +87,7 @@ templates = Jinja2Templates(directory='templates')
 
 def create_routes_list(database, yaml_dict: dict) -> list:
     app_routes = []
+    print(yaml_dict)
     for key,value in yaml_dict.items():
         for k, v in value.items():
             endpoint = v['endpoint']
