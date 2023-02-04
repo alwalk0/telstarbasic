@@ -45,12 +45,12 @@ def get_execute_function(method, query, database):
             return database.execute(query)
 
 
-def create_view_function(endpoint, database, templates, models):
+def create_view_function(endpoint, database):
 
     method = endpoint['method']
     return_type = endpoint['return']
     fields = (endpoint['fields']).split(', ')
-    table = str(models).removesuffix('.py')
+    table = endpoint['db_table']
 
     async def view_function(request):
 
@@ -89,7 +89,7 @@ def create_routes_list(yaml_dict: dict, database, templates, models) -> list:
                     
                 method = v['method']
 
-                app_routes.append(Route(url, endpoint=create_view_function(v, database, templates, models),methods=[method]))
+                app_routes.append(Route(url, endpoint=create_view_function(v, database),methods=[method]))
 
             elif endpoint == 'view':
                 template = v['template']
