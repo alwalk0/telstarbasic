@@ -11,7 +11,6 @@ from starlette.responses import JSONResponse
 from starlette.templating import Jinja2Templates
 
 
-
 def set_response(method, type, results, fields):
     match type:
         case 'json':
@@ -46,18 +45,22 @@ def get_execute_function(method, query, database):
             return database.execute(query)
 
 
+def create_view_function(endpoint, database, templates, models):
 
-def create_view_function(table, method, database, return_type, fields):
+    method = endpoint['method']
+    return_type = endpoint['return']
+    fields = (endpoint['fields']).split(', ')
+    table = str(models).removesuffix('.py')
 
     async def view_function(request):
 
-        query = await get_query(request, method, table)
+        query = await get_query(request, method, table=eval(table))
+
         results = await get_execute_function(method, query, database)
 
         return set_response(method, return_type, results, fields=fields)
 
     return view_function 
-
 
 
 def read_key_from_config(config:str, key:str)-> str:
@@ -67,12 +70,8 @@ def read_key_from_config(config:str, key:str)-> str:
     return yaml_dict.get(key)
 
 
+def get_database(models, database):
 
-
-def get_database():
-
-    models = read_key_from_config('main.yml', 'models')
-    database = read_key_from_config('main.yml', 'database')
     module_path = Path(__file__).parent.parent
     file_path = str(module_path) + '/' + models
     modulename = importlib.machinery.SourceFileLoader(models.removesuffix('.py'), file_path).load_module()
@@ -80,14 +79,8 @@ def get_database():
     return getattr(modulename, database)
     
 
-
-
-templates = Jinja2Templates(directory='templates')
-
-
-def create_routes_list(database, yaml_dict: dict) -> list:
+def create_routes_list(yaml_dict: dict, database, templates, models) -> list:
     app_routes = []
-    print(yaml_dict)
     for key,value in yaml_dict.items():
         for k, v in value.items():
             endpoint = v['endpoint']
@@ -95,11 +88,8 @@ def create_routes_list(database, yaml_dict: dict) -> list:
             if endpoint == 'api':
                     
                 method = v['method']
-                db_table = v['db_table']
-                return_type = v['return']
-                fields = (v['fields']).split(', ')
 
-                app_routes.append(Route(url, endpoint=create_view_function(table=eval(db_table), method=method, database=database, return_type=return_type, fields=fields),methods=[method]))
+                app_routes.append(Route(url, endpoint=create_view_function(v, database, templates, models),methods=[method]))
 
             elif endpoint == 'view':
                 template = v['template']
@@ -112,11 +102,18 @@ def create_routes_list(database, yaml_dict: dict) -> list:
 def create_app_from_config(config:str)-> Starlette:
 
     with open(config, 'r') as file:
-        yaml_dict = yaml.safe_load(file)
+        main_config = yaml.safe_load(file)
 
-    database = get_database()
+    views_config = main_config['views']
 
-    app_routes = create_routes_list(database, yaml_dict=yaml_dict)    
+    with open(views_config, 'r') as file:
+        views_dict = yaml.safe_load(file)    
+
+    database = get_database(main_config['models'], main_config['database'])
+
+    templates = Jinja2Templates(directory=str(main_config['templates']))
+
+    app_routes = create_routes_list(yaml_dict=views_dict, database=database, templates=templates, models=main_config['models'])    
 
     app = Starlette(
         routes=app_routes,
