@@ -1,23 +1,22 @@
-my_app:
-  list_notes:
-    url: '/articles'
-    endpoint: api
-    method: GET
-    db_table: articles
-    return: json
-    fields: title, url
-  add_note:
-    url: '/articles'
-    endpoint: api
-    method: POST
-    db_table: articles
-    return: json
-    fields: title, url
-  homepage:
-    url: '/'
-    endpoint: 'view'
-    template: 'index.html'
-  testpage:
-    url: '/home'
-    endpoint: view
-    template: 'index.html'  
+list_notes:
+  url: '/articles'
+  endpoint: api
+  method: GET
+  db_table: articles
+  return: json
+  fields: title, url
+add_note:
+  url: '/articles'
+  endpoint: api
+  method: POST
+  db_table: articles
+  return: json
+  fields: title, url
+homepage:
+  url: '/'
+  endpoint: 'view'
+  template: 'index.html'
+testpage:
+  url: '/home'
+  endpoint: view
+  template: 'index.html'  
