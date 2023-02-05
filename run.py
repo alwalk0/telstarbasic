@@ -1,6 +1,6 @@
 import uvicorn
 import yaml
-from framework.parse_yaml import create_app_from_config, read_key_from_config
+from framework.parse_yaml import create_app_from_config
 
 
 MAIN_CONFIG_PATH = 'main.yml'
