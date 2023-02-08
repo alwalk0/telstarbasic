@@ -1,5 +1,4 @@
 import yaml
-from articles import articles
 from starlette.routing import Route
 from starlette.applications import Starlette
 from starlette.routing import Route, Mount
@@ -16,37 +15,38 @@ def create_app_from_config(main_config:str)-> Starlette:
 
     views_config = main_config['views']
     models = main_config['models']
-    database = main_config['database']
+    database_name = main_config['database']
     templates = main_config['templates']
-
-    with open(views_config, 'r') as file:
-        views_dict = yaml.safe_load(file)    
-
-    database = get_database(models, database)
 
     templates = Jinja2Templates(directory=str(templates))
 
-    app_routes = create_routes_list(yaml_dict=views_dict, database=database, templates=templates)    
 
-    app = Starlette(
-        routes=app_routes,
-        on_startup=[database.connect],
-        on_shutdown=[database.disconnect]
-    )
+    with open(views_config, 'r') as file:
+        views_dict = yaml.safe_load(file)   
 
-    return app
+    database = get_module_from_models(models, database_name)
+    app_routes = create_routes_list(yaml_dict=views_dict, database=database, templates=templates, models=models)       
+    
+
+    app =  Starlette(
+            routes=app_routes,
+            on_startup=[database.connect],
+            on_shutdown=[database.disconnect]
+        )
+
+    return app    
 
 
-def get_database(models:str, database:str) -> Database:
+def get_module_from_models(models:str, module:str) -> Database:
 
     module_path = Path(__file__).parent.parent
     file_path = str(module_path) + '/' + models
     modulename = importlib.machinery.SourceFileLoader(models.removesuffix('.py'), file_path).load_module()
 
-    return getattr(modulename, database)
+    return getattr(modulename, module)
 
 
-def create_routes_list(yaml_dict: dict, database: Database, templates: Jinja2Templates) -> list:
+def create_routes_list(yaml_dict: dict, database: Database, templates: Jinja2Templates, models) -> list:
     app_routes = []
 
     for view, specs in yaml_dict.items():
@@ -55,7 +55,7 @@ def create_routes_list(yaml_dict: dict, database: Database, templates: Jinja2Tem
         if endpoint == 'api':
                 
             method = specs['method']
-            app_routes.append(Route(url, endpoint=create_view_function(specs=specs, database=database),methods=[method]))
+            app_routes.append(Route(url, endpoint=create_view_function(specs=specs, database=database, models=models),methods=[method]))
 
         elif endpoint == 'view':
             template = specs['template']
@@ -65,16 +65,17 @@ def create_routes_list(yaml_dict: dict, database: Database, templates: Jinja2Tem
     return app_routes      
 
 
-def create_view_function(specs:dict, database: Database) -> callable:
+def create_view_function(specs:dict, database: Database, models) -> callable:
 
     method = specs['method']
     return_type = specs['return']
     fields = (specs['fields']).split(', ')
-    table = specs['db_table']
+    db_table = specs['db_table']
+    table = get_module_from_models(models, db_table)
 
     async def view_function(request):
 
-        query = await get_query(request, method=method, table=eval(table))
+        query = await get_query(request, method=method, table=table)
 
         results = await get_execute_function(method=method, query=query, database=database)
 
