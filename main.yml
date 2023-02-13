@@ -1,7 +1,15 @@
 host: 0.0.0.0
 port: 8000
-app_name: my_app
 models: articles.py
 database: database
-templates: templates
-views: views.yml
+endpoints:
+  list_notes:
+    url: '/articles'
+    method: GET
+    table: articles
+    fields: title, url
+  add_note:
+    url: '/articles'
+    method: POST
+    table: articles
+    fields: title, url

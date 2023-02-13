@@ -1,33 +1,24 @@
-import yaml
-from starlette.routing import Route
-from starlette.applications import Starlette
-from starlette.routing import Route, Mount
-from starlette.staticfiles import StaticFiles
 import importlib
 import importlib.machinery
 from pathlib import Path
-from starlette.responses import JSONResponse
-from starlette.templating import Jinja2Templates
+
+import yaml
 from databases import Database
+from starlette.applications import Starlette
 from starlette.requests import Request
-
-def create_app_from_config(main_config:str)-> Starlette:
-
-    views_config = main_config['views']
-    models = main_config['models']
-    database_name = main_config['database']
-    templates = main_config['templates']
-
-    templates = Jinja2Templates(directory=str(templates))
+from starlette.responses import JSONResponse
+from starlette.routing import Route
 
 
-    with open(views_config, 'r') as file:
-        views_dict = yaml.safe_load(file)   
+def create_app_from_config(config:dict)-> Starlette:
 
-    database = get_module_from_models(models, database_name)
-    app_routes = create_routes_list(yaml_dict=views_dict, database=database, templates=templates, models=models)       
+    models_file = config.get('models')
+    database = config.get('database')
+    database = import_from_models_file(models=models_file, module=database)
+
+    endpoints = config.get('endpoints')
+    app_routes = create_routes_list(endpoints, models_file, database)
     
-
     app =  Starlette(
             routes=app_routes,
             on_startup=[database.connect],
@@ -37,49 +28,31 @@ def create_app_from_config(main_config:str)-> Starlette:
     return app    
 
 
-def get_module_from_models(models:str, module:str) -> Database:
-
-    module_path = Path(__file__).parent.parent
-    file_path = str(module_path) + '/' + models
-    modulename = importlib.machinery.SourceFileLoader(models.removesuffix('.py'), file_path).load_module()
-
-    return getattr(modulename, module)
-
-
-def create_routes_list(yaml_dict: dict, database: Database, templates: Jinja2Templates, models) -> list:
+def create_routes_list(endpoints_dict: dict, models_file:str, database: Database) -> list:
     app_routes = []
 
-    for view, specs in yaml_dict.items():
-        endpoint = specs['endpoint']
+    for view, specs in endpoints_dict.items():
         url = specs['url']
-        if endpoint == 'api':
-                
-            method = specs['method']
-            app_routes.append(Route(url, endpoint=create_view_function(specs=specs, database=database, models=models),methods=[method]))
+        method = specs['method']
+        fields = (specs['fields']).split(', ')
+        db_table = specs['table']
+        table = import_from_models_file(models=models_file, module=db_table)
+        endpoint = create_view_function(database, method, table, fields)
 
-        elif endpoint == 'view':
-            template = specs['template']
-            app_routes.append(Route(url, lambda request:templates.TemplateResponse(template, {'request':request})))
-            app_routes.append(Mount('/static', app=StaticFiles(directory='statics'), name='static'))     
+        app_routes.append(Route(url, endpoint=endpoint,methods=[method]))
 
     return app_routes      
 
 
-def create_view_function(specs:dict, database: Database, models) -> callable:
+def create_view_function(database, method, table, fields) -> callable:
 
-    method = specs['method']
-    return_type = specs['return']
-    fields = (specs['fields']).split(', ')
-    db_table = specs['db_table']
-    table = get_module_from_models(models, db_table)
-
-    async def view_function(request):
+    async def view_function(request:Request) -> callable:
 
         query = await get_query(request, method=method, table=table)
 
         results = await get_execute_function(method=method, query=query, database=database)
 
-        return set_response(method=method, type=return_type, results=results, fields=fields)
+        return set_response(method=method, results=results, fields=fields)
 
     return view_function 
 
@@ -101,19 +74,26 @@ def get_execute_function(method: str, query, database: Database):
             return database.execute(query)
 
 
-def set_response(method: str, type, results, fields: list):
-    match type:
-        case 'json':
-            match method:
-                case 'GET':
-                    content = [
-                    {
-                        field: result[field] for field in fields
-                    }
-                    for result in results
-                    ]
-                    return JSONResponse(content)
-                case 'POST':
-                    return JSONResponse({'OK':'OK'})
+def set_response(method: str, results, fields: list) -> JSONResponse:
 
+    match method:
+        case 'GET':
+            content = [
+            {
+                field: result[field] for field in fields
+            }
+            for result in results
+            ]
+            return JSONResponse(content)
+        case 'POST':
+            return JSONResponse({'OK':'OK'})
+
+
+def import_from_models_file(models:str, module:str) -> Database:
+
+    module_path = Path(__file__).parent.parent
+    file_path = str(module_path) + '/' + models
+    modulename = importlib.machinery.SourceFileLoader(models.removesuffix('.py'), file_path).load_module()
+
+    return getattr(modulename, module)
 
